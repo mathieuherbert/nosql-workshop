@@ -59,13 +59,11 @@ public class SearchService {
                 .execute()
                 .actionGet();
         List<Installation> installationList =new ArrayList<Installation>();
-    try{
+
         SearchHit[] hits = response.getHits().getHits();
         for(int i = 0; i<hits.length; i++)
-            installationList.add(objectMapper.readValue(hits[i].source(), Installation.class));
-    } catch (IOException e) {
-        e.printStackTrace();
-    }
+            installationList.add(mapToInstallation(hits[i]));
+
         return installationList;
     }
 
@@ -99,6 +97,33 @@ public class SearchService {
             e.printStackTrace();
         }*/
         // Query
-         throw new UnsupportedOperationException();
+        System.out.println(townName);
+        SearchResponse response = elasticSearchClient.prepareSearch("installations")
+                .setTypes("installation")
+                .setSearchType(SearchType.DFS_QUERY_THEN_FETCH)
+                .addField("location.coordinates")
+                .setQuery(QueryBuilders.matchQuery("adresse.commune", townName))
+                .setFrom(0).setSize(1).setExplain(true)
+                .execute()
+                .actionGet();
+        System.out.println(response.getHits().getTotalHits());
+        SearchHit[] hits = response.getHits().getHits();
+        if(hits.length == 0){
+            System.out.println("aucune match");
+            throw new UnsupportedOperationException();
+        }else {
+            System.out.println("ici");
+
+            List<Object> values = hits[0].field("location.coordinates").values();
+
+            Double[] ret = new Double[values.size()];
+            for(int i =0; i<values.size();i++){
+                ret[i] = (Double) values.get(i);
+            }
+          return ret;
+
+        }
+
+
     }
 }
