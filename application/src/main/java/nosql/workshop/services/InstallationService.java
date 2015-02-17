@@ -140,7 +140,15 @@ public class InstallationService {
      * @return les résultats correspondant à la requête.
      */
     public List<Installation> search(String searchQuery) {
-        Iterator<Installation> it = installations.find("{nom:\""+searchQuery+"\"}").as(Installation.class).iterator();
+        Iterator<Installation> it = installations.find("{\n" +
+                "        \"$text\": {\n" +
+                "            \"$search\": \""+searchQuery+"\",\n" +
+                "            \"$language\" : \"french\"\n" +
+                "        }\n" +
+                "    },\n" +
+                "    {\n" +
+                "        \"score\": {\"$meta\": \"textScore\"}\n" +
+                "    }").as(Installation.class).iterator();
         List<Installation> installationList = new ArrayList<>();
         System.out.println("retour geo");
         while (it.hasNext()){

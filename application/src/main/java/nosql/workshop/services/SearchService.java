@@ -51,8 +51,22 @@ public class SearchService {
      */
     public List<Installation> search(String searchQuery) {
         // TODO codez le service
-
-        throw new UnsupportedOperationException();
+        System.out.println("search "+ searchQuery);
+        SearchResponse response = elasticSearchClient.prepareSearch("installations")
+                .setTypes("installation")
+                .setSearchType(SearchType.DFS_QUERY_THEN_FETCH)
+                .setQuery(QueryBuilders.termQuery("_all", searchQuery)).setExplain(true)
+                .execute()
+                .actionGet();
+        List<Installation> installationList =new ArrayList<Installation>();
+    try{
+        SearchHit[] hits = response.getHits().getHits();
+        for(int i = 0; i<hits.length; i++)
+            installationList.add(objectMapper.readValue(hits[i].source(), Installation.class));
+    } catch (IOException e) {
+        e.printStackTrace();
+    }
+        return installationList;
     }
 
     /**
@@ -76,14 +90,7 @@ public class SearchService {
 
     public Double[] getTownLocation(String townName) {
         // TODO codez le service
-        QueryBuilder qb = QueryBuilders.matchQuery("_all", townName);
-        SearchResponse response = elasticSearchClient.prepareSearch("installations")
-                .setTypes("installation")
-                .setSearchType(SearchType.DFS_QUERY_THEN_FETCH)
-                .setQuery(QueryBuilders.termQuery("town", townName)).setExplain(true)
-                .execute()
-                .actionGet();
-        List<Installation> installationList =new ArrayList<Installation>();
+
        /* try {
             SearchHit[] hits = response.getHits().getHits();
             for(int i = 0; i<hits.length; i++)
