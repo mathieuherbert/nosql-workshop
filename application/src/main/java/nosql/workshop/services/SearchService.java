@@ -50,12 +50,12 @@ public class SearchService {
      * @return la listes de installations
      */
     public List<Installation> search(String searchQuery) {
-        // TODO codez le service
+
         System.out.println("search "+ searchQuery);
         SearchResponse response = elasticSearchClient.prepareSearch("installations")
                 .setTypes("installation")
                 .setSearchType(SearchType.DFS_QUERY_THEN_FETCH)
-                .setQuery(QueryBuilders.termQuery("_all", searchQuery)).setExplain(true)
+                .setQuery(QueryBuilders.wildcardQuery("_all", searchQuery)).setExplain(true)
                 .execute()
                 .actionGet();
         List<Installation> installationList =new ArrayList<Installation>();
@@ -86,7 +86,7 @@ public class SearchService {
         SearchResponse response = elasticSearchClient.prepareSearch("towns")
                 .setTypes("town")
                 .setSearchType(SearchType.DFS_QUERY_THEN_FETCH)
-                .setQuery(QueryBuilders.wildcardQuery("townName", townName.toLowerCase()+"*"))
+                .setQuery(QueryBuilders.wildcardQuery("townName", townName.toLowerCase() + "*"))
                 .setExplain(true)
                 .execute()
                 .actionGet();
