@@ -137,9 +137,18 @@ public class InstallationService {
      */
     public List<Installation> geosearch(double lat, double lng, double distance) {
 
-        installations.ensureIndex("location.coordinates","2dsphere");
+        //installations.ensureIndex("location","2dsphere");
 
-        MongoCursor<Installation> it =  installations.find("{location.coordinates : {$near: ["+lat+", "+lng+"], $maxDistance: " + distance + "}}").as(Installation.class);
+        MongoCursor<Installation> it =  installations.find("{ \"location\" : \n" +
+                "    { $near :\n" +
+                "        { $geometry :\n" +
+                "            { type : \"Point\" ,\n" +
+                "              coordinates : [ "+lng+", "+lat+" ]\n" +
+                "            },\n" +
+                "            $maxDistance : "+distance+"\n" +
+                "        }\n" +
+                "    }\n" +
+                "}").as(Installation.class);
 
         // TODO codez le service
         List<Installation> installationList = new ArrayList<>();
