@@ -86,7 +86,7 @@ public class SearchService {
         SearchResponse response = elasticSearchClient.prepareSearch("towns")
                 .setTypes("town")
                 .setSearchType(SearchType.DFS_QUERY_THEN_FETCH)
-                .setQuery(QueryBuilders.wildcardQuery("townName", townName+"*"))
+                .setQuery(QueryBuilders.wildcardQuery("townName", townName.toLowerCase()+"*"))
                 .setExplain(true)
                 .execute()
                 .actionGet();
