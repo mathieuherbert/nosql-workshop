@@ -83,6 +83,7 @@ public class SearchService {
 
     public List<TownSuggest> suggestTownName(String townName){
         // TODO codez le service
+
         throw new UnsupportedOperationException();
     }
 
