@@ -99,12 +99,12 @@ public class SearchService {
         }*/
         // Query
         System.out.println(townName);
-        SearchResponse response = elasticSearchClient.prepareSearch("installations")
-                .setTypes("installation")
+        SearchResponse response = elasticSearchClient.prepareSearch("towns")
+                .setTypes("town")
                 .setSearchType(SearchType.DFS_QUERY_THEN_FETCH)
-                .addField("location.coordinates")
-                .setQuery(QueryBuilders.matchQuery("adresse.commune", townName))
-                .setFrom(0).setSize(1).setExplain(true)
+                .addField("location")
+                .setQuery(QueryBuilders.matchQuery("townName", townName))
+                .setExplain(true)
                 .execute()
                 .actionGet();
         System.out.println(response.getHits().getTotalHits());
@@ -115,7 +115,7 @@ public class SearchService {
         }else {
             System.out.println("ici");
 
-            List<Object> values = hits[0].field("location.coordinates").values();
+            List<Object> values = hits[0].field("location").values();
 
             Double[] ret = new Double[values.size()];
             for(int i =0; i<values.size();i++){

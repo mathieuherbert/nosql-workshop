@@ -51,8 +51,8 @@ public class ImportTowns {
         Double latitude = Double.valueOf(split[7]);
         Map<String, Object> map = new HashMap<String,Object>();
         map.put("townName", townName);
-        
-        Double[] coordinates = {latitude,longitude};
+
+        Double[] coordinates = {longitude,latitude};
         map.put("location", coordinates);
 
             bulkRequest.add(elasticSearchClient.prepareIndex("towns", "town")
