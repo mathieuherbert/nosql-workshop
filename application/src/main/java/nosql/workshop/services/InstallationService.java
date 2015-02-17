@@ -7,6 +7,7 @@ import com.mongodb.DBObject;
 import nosql.workshop.model.Installation;
 import nosql.workshop.model.stats.CountByActivity;
 import org.bson.types.ObjectId;
+import org.jongo.Aggregate;
 import org.jongo.FindOne;
 import org.jongo.MongoCollection;
 import org.jongo.MongoCursor;
@@ -92,9 +93,8 @@ public class InstallationService {
      * @return l'installation avec le plus d'équipements.
      */
     public Installation installationWithMaxEquipments() {
-
-        // TODO codez le service
-        throw new UnsupportedOperationException();
+        System.out.println("withMaxEquipments");
+        return  installations.aggregate("{ $group: { _id:'$_id', countEq:{$sum:1}}},{$sort:{'countEq':-1}},{$limit:1}").as(Installation.class).iterator().next();
     }
 
     /**
@@ -103,13 +103,27 @@ public class InstallationService {
      * @return le nombre d'installations par activité.
      */
     public List<CountByActivity> countByActivity() {
-        // TODO codez le service
-        throw new UnsupportedOperationException();
+        System.out.println("countbyactivity");
+        Iterator<CountByActivity> it  = installations.aggregate(" {$unwind : \"$equipements\" }, {$unwind :\"$equipements.activites\" }, {$group: {_id:\"$equipements.activites\", total: {$sum:1} }},\n" +
+                "\t{ $project : { _id : 0, activite : \"$_id\" , total : 1 } }\n" +
+                "\t").as(CountByActivity.class).iterator();
+
+        List<CountByActivity> countByActivities = new ArrayList<>();
+
+        while (it.hasNext()){
+            countByActivities.add(it.next());
+        }
+        System.out.println("countByActivities");
+        System.out.println(countByActivities);
+        return countByActivities;
     }
 
     public double averageEquipmentsPerInstallation() {
-        // TODO codez le service
-        throw new UnsupportedOperationException();
+        System.out.println("averageEquipmentsPerInstallation");
+
+        double ret = (double)(installations.aggregate(" {$unwind : \"$equipements\"} ").as(Object.class).size())/(double )count() ;
+        System.out.println(ret);
+        return ret;
     }
 
     /**
@@ -152,7 +166,7 @@ public class InstallationService {
                 "    }\n" +
                 "}").as(Installation.class);
 
-        // TODO codez le service
+
         List<Installation> installationList = new ArrayList<>();
         System.out.println("retour geo");
         while (it.hasNext()){
