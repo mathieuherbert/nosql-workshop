@@ -10,10 +10,13 @@ import org.elasticsearch.common.transport.InetSocketTransportAddress;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 
 import static nosql.workshop.batch.elasticsearch.util.ElasticSearchBatchUtils.checkIndexExists;
 import static nosql.workshop.batch.elasticsearch.util.ElasticSearchBatchUtils.dealWithFailures;
-
+import static org.elasticsearch.common.xcontent.XContentFactory.jsonBuilder;
 /**
  * Job d'import des rues de towns_paysdeloire.csv vers ElasticSearch (/towns/town)
  */
@@ -46,7 +49,18 @@ public class ImportTowns {
         String townName = split[1].replaceAll("\"", "");
         Double longitude = Double.valueOf(split[6]);
         Double latitude = Double.valueOf(split[7]);
+        Map<String, Object> map = new HashMap<String,Object>();
+        map.put("townName", townName);
+        
+        Double[] coordinates = {latitude,longitude};
+        map.put("location", coordinates);
 
-        // TODO ajoutez le code permettant d'insérer la ville
+            bulkRequest.add(elasticSearchClient.prepareIndex("towns", "town")
+                            .setSource(map
+                            )
+
+            );
+
+
     }
 }
