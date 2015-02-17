@@ -82,9 +82,30 @@ public class SearchService {
     }
 
     public List<TownSuggest> suggestTownName(String townName){
-        // TODO codez le service
+        System.out.println(townName);
+        SearchResponse response = elasticSearchClient.prepareSearch("towns")
+                .setTypes("town")
+                .setSearchType(SearchType.DFS_QUERY_THEN_FETCH)
+                .setQuery(QueryBuilders.matchQuery("townName", townName))
+                .setExplain(true)
+                .execute()
+                .actionGet();
+        System.out.println(response.getHits().getTotalHits());
+        List<TownSuggest> townSuggests =  new ArrayList<TownSuggest>();
+        SearchHit[] hits = response.getHits().getHits();
+        for(int i = 0; i<hits.length; i++) {
+            try {
+                townSuggests.add(objectMapper.readValue(hits[i].getSourceAsString(), TownSuggest.class));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return townSuggests;
 
-        throw new UnsupportedOperationException();
+
+
+
+
     }
 
     public Double[] getTownLocation(String townName) {
