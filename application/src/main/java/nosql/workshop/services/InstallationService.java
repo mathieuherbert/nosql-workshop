@@ -140,6 +140,15 @@ public class InstallationService {
      * @return les résultats correspondant à la requête.
      */
     public List<Installation> search(String searchQuery) {
+        System.out.println("Create Index Weight");
+        BasicDBObject index = new BasicDBObject();
+        index.put("nom", "text");
+        index.put("adresse", "text");
+        BasicDBObject weights = new BasicDBObject("nom", 3).append("adresse", 10);
+        BasicDBObject options = new BasicDBObject("weights", weights).append("default_language", "french");
+        installations.getDBCollection().createIndex(index, options);
+
+
         Iterator<Installation> it = installations.find("{\n" +
                 "        \"$text\": {\n" +
                 "            \"$search\": \""+searchQuery+"\",\n" +
