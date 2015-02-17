@@ -54,11 +54,11 @@ public class InstallationsImporter {
         basicDBObject.put("adresse",adressDBObject );
 
         BasicDBObject locationDBObject = new BasicDBObject();
-        adressDBObject.put("type", "Point");
+        locationDBObject.put("type", "Point");
         double[] locations = new double[2];
         locations[0] = Double.parseDouble(columns[9]);
         locations[1] = Double.parseDouble(columns[10]);
-        adressDBObject.put("coordinates", locations);
+        locationDBObject.put("coordinates", locations);
         basicDBObject.put("location",locationDBObject);
 
 

@@ -38,8 +38,8 @@ public class EquipementsImporter {
 
         DBObject newEquipement = new BasicDBObject();
         newEquipement.put("numero", columns[4]);
-        newEquipement.put("nom", columns[3]);
-        newEquipement.put("type", columns[5]);
+        newEquipement.put("nom", columns[5]);
+        newEquipement.put("type", columns[7]);
         newEquipement.put("famille", columns[9]);
 
         BasicDBObject searchQuery = new BasicDBObject().append("_id", installationId);

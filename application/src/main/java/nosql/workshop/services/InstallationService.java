@@ -1,13 +1,17 @@
 package nosql.workshop.services;
 
 import com.google.inject.Inject;
+import com.mongodb.BasicDBObject;
+import com.mongodb.DBObject;
 import nosql.workshop.model.Installation;
 import nosql.workshop.model.stats.CountByActivity;
+import org.bson.types.ObjectId;
+import org.jongo.FindOne;
 import org.jongo.MongoCollection;
+import org.jongo.MongoCursor;
 
 import java.net.UnknownHostException;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 /**
  * Service permettant de manipuler les installations sportives.
@@ -34,7 +38,10 @@ public class InstallationService {
      */
     public Installation get(String numero) {
         // TODO codez le service
-        throw new UnsupportedOperationException();
+
+        Installation installation = installations.findOne("{\"_id\":\"" + numero + "\"}").as(Installation.class);
+
+        return installation;
     }
 
     /**
@@ -46,7 +53,13 @@ public class InstallationService {
      */
     public List<Installation> list(int page, int pageSize) {
         // TODO codez le service
-        throw new UnsupportedOperationException();
+        System.out.println("ici!!!!!!!!!!!!!");
+        List<Installation> installationList = new ArrayList<>();
+        Iterator<Installation> it  = installations.find().skip((page - 1) * pageSize).limit(pageSize).as(Installation.class).iterator();
+        while (it.hasNext()){
+            installationList.add(it.next());
+        }
+       return installationList;
     }
 
     /**
@@ -58,7 +71,9 @@ public class InstallationService {
         long count = count();
         int random = new Random().nextInt((int) count);
         // TODO codez le service
-        throw new UnsupportedOperationException();
+        return  installations.find().skip(random).limit(1).as(Installation.class).next();
+
+
     }
 
     /**
@@ -76,6 +91,7 @@ public class InstallationService {
      * @return l'installation avec le plus d'équipements.
      */
     public Installation installationWithMaxEquipments() {
+
         // TODO codez le service
         throw new UnsupportedOperationException();
     }
@@ -102,8 +118,13 @@ public class InstallationService {
      * @return les résultats correspondant à la requête.
      */
     public List<Installation> search(String searchQuery) {
-        // TODO codez le service
-        throw new UnsupportedOperationException();
+        Iterator<Installation> it = installations.find("{nom:\""+searchQuery+"\"}").as(Installation.class).iterator();
+        List<Installation> installationList = new ArrayList<>();
+        System.out.println("retour geo");
+        while (it.hasNext()){
+            installationList.add(it.next());
+        }
+        return installationList;
     }
 
     /**
@@ -115,7 +136,18 @@ public class InstallationService {
      * @return les installations dans la zone géographique demandée.
      */
     public List<Installation> geosearch(double lat, double lng, double distance) {
+
+        installations.ensureIndex("location.coordinates","2dsphere");
+
+        MongoCursor<Installation> it =  installations.find("{location.coordinates : {$near: ["+lat+", "+lng+"], $maxDistance: " + distance + "}}").as(Installation.class);
+
         // TODO codez le service
-        throw new UnsupportedOperationException();
+        List<Installation> installationList = new ArrayList<>();
+        System.out.println("retour geo");
+        while (it.hasNext()){
+            installationList.add(it.next());
+        }
+        return installationList;
+
     }
 }

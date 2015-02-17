@@ -36,22 +36,14 @@ public class ActivitesImporter {
         // Programmation défensive : certaines lignes n'ont pas d'activités de définies
         if (columns.length >= 6) {
             String equipementId = columns[2].trim();
-
             // TODO codez la mise à jour de l'installation pour rattacher les activités à ses équipements
 
-
-            System.out.println();
             BasicDBObject searchQuery = new BasicDBObject().append("equipements.numero", equipementId);
             BasicDBObject updateQuery = new BasicDBObject();
             updateQuery.append("$push",
                     new BasicDBObject().append("equipements.$.activites", columns[5]));
 
             installationsCollection.update(searchQuery, updateQuery);
-
-
-
-
-            // System.out.println(installation);
 
         }
     }
