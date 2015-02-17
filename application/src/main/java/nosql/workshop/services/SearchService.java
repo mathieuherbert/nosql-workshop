@@ -52,10 +52,15 @@ public class SearchService {
     public List<Installation> search(String searchQuery) {
 
         System.out.println("search "+ searchQuery);
+        QueryBuilder qb = QueryBuilders
+                .boolQuery()
+                .must(QueryBuilders.wildcardQuery("adresse.commune", searchQuery+"*").boost(10))
+                .must(QueryBuilders.wildcardQuery("nom", searchQuery+"*").boost(3));
+
         SearchResponse response = elasticSearchClient.prepareSearch("installations")
                 .setTypes("installation")
                 .setSearchType(SearchType.DFS_QUERY_THEN_FETCH)
-                .setQuery(QueryBuilders.wildcardQuery("_all", searchQuery)).setExplain(true)
+                .setQuery(qb).setExplain(true)
                 .execute()
                 .actionGet();
         List<Installation> installationList =new ArrayList<Installation>();
