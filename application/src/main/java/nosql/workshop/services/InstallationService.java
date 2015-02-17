@@ -94,7 +94,10 @@ public class InstallationService {
      */
     public Installation installationWithMaxEquipments() {
         System.out.println("withMaxEquipments");
-        return  installations.aggregate("{ $group: { _id:'$_id', countEq:{$sum:1}}},{$sort:{'countEq':-1}},{$limit:1}").as(Installation.class).iterator().next();
+        return  installations.aggregate("{$project: {nbEquipements : { $size: \"$equipements\"},nom: 1,equipements: 1}}")
+        .and("{$sort:{\"nbEquipements\" : -1}}")
+        .and("{$limit : 1}")
+        .as(Installation.class).iterator().next();
     }
 
     /**
@@ -104,9 +107,10 @@ public class InstallationService {
      */
     public List<CountByActivity> countByActivity() {
         System.out.println("countbyactivity");
-        Iterator<CountByActivity> it  = installations.aggregate(" {$unwind : \"$equipements\" }, {$unwind :\"$equipements.activites\" }, {$group: {_id:\"$equipements.activites\", total: {$sum:1} }},\n" +
-                "\t{ $project : { _id : 0, activite : \"$_id\" , total : 1 } }\n" +
-                "\t").as(CountByActivity.class).iterator();
+        Iterator<CountByActivity> it  = installations.aggregate(" {$unwind : \"$equipements\" }")
+                .and(" {$unwind :\"$equipements.activites\" }").and(" {$group: {_id:\"$equipements.activites\", total: {$sum:1} }}")
+        .and("\t{ $project : { _id : 0, activite : \"$_id\" , total : 1 } }\n"
+                ).and(" {$sort : {total : -1}}").as(CountByActivity.class).iterator();
 
         List<CountByActivity> countByActivities = new ArrayList<>();
 
@@ -114,7 +118,10 @@ public class InstallationService {
             countByActivities.add(it.next());
         }
         System.out.println("countByActivities");
-        System.out.println(countByActivities);
+        System.out.println(countByActivities.size());
+        System.out.println(countByActivities.get(0).getActivite());
+        System.out.println(countByActivities.get(0).getTotal());
+        //throw new UnsupportedOperationException();
         return countByActivities;
     }
 

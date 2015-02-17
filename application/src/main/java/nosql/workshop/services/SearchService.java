@@ -6,12 +6,17 @@ import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import nosql.workshop.model.Installation;
 import nosql.workshop.model.suggest.TownSuggest;
+import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.action.search.SearchType;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.transport.InetSocketTransportAddress;
+import org.elasticsearch.index.query.QueryBuilder;
+import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -46,6 +51,7 @@ public class SearchService {
      */
     public List<Installation> search(String searchQuery) {
         // TODO codez le service
+
         throw new UnsupportedOperationException();
     }
 
@@ -70,6 +76,22 @@ public class SearchService {
 
     public Double[] getTownLocation(String townName) {
         // TODO codez le service
-        throw new UnsupportedOperationException();
+        QueryBuilder qb = QueryBuilders.matchQuery("_all", townName);
+        SearchResponse response = elasticSearchClient.prepareSearch("installations")
+                .setTypes("installation")
+                .setSearchType(SearchType.DFS_QUERY_THEN_FETCH)
+                .setQuery(QueryBuilders.termQuery("town", townName)).setExplain(true)
+                .execute()
+                .actionGet();
+        List<Installation> installationList =new ArrayList<Installation>();
+       /* try {
+            SearchHit[] hits = response.getHits().getHits();
+            for(int i = 0; i<hits.length; i++)
+                installationList.add(objectMapper.readValue([0].source(), Installation.class));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }*/
+        // Query
+         throw new UnsupportedOperationException();
     }
 }
