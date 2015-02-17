@@ -2,6 +2,7 @@ package nosql.workshop.services;
 
 import com.google.inject.Inject;
 import com.mongodb.BasicDBObject;
+import com.mongodb.BasicDBObjectBuilder;
 import com.mongodb.DBObject;
 import nosql.workshop.model.Installation;
 import nosql.workshop.model.stats.CountByActivity;
@@ -137,15 +138,16 @@ public class InstallationService {
      */
     public List<Installation> geosearch(double lat, double lng, double distance) {
 
-        //installations.ensureIndex("location","2dsphere");
+        DBObject index2d = BasicDBObjectBuilder.start("location", "2dsphere").get();
+         installations.getDBCollection().createIndex(index2d);
 
-        MongoCursor<Installation> it =  installations.find("{ \"location\" : \n" +
+        MongoCursor<Installation> it = installations.find("{ \"location\" : \n" +
                 "    { $near :\n" +
                 "        { $geometry :\n" +
                 "            { type : \"Point\" ,\n" +
-                "              coordinates : [ "+lng+", "+lat+" ]\n" +
+                "              coordinates : [ " + lng + ", " + lat + " ]\n" +
                 "            },\n" +
-                "            $maxDistance : "+distance+"\n" +
+                "            $maxDistance : " + distance + "\n" +
                 "        }\n" +
                 "    }\n" +
                 "}").as(Installation.class);
