@@ -39,10 +39,7 @@ public class InstallationService {
      * @return l'installation correspondante, ou <code>null</code> si non trouvée.
      */
     public Installation get(String numero) {
-        // TODO codez le service
-
-        Installation installation = installations.findOne("{\"_id\":\"" + numero + "\"}").as(Installation.class);
-
+        Installation installation = installations.findOne("{_id : # }",numero).as(Installation.class);
         return installation;
     }
 
@@ -54,8 +51,6 @@ public class InstallationService {
      * @return la liste des installations.
      */
     public List<Installation> list(int page, int pageSize) {
-        // TODO codez le service
-        System.out.println("ici!!!!!!!!!!!!!");
         List<Installation> installationList = new ArrayList<>();
         Iterator<Installation> it  = installations.find().skip((page - 1) * pageSize).limit(pageSize).as(Installation.class).iterator();
         while (it.hasNext()){
@@ -72,10 +67,7 @@ public class InstallationService {
     public Installation random() {
         long count = count();
         int random = new Random().nextInt((int) count);
-        // TODO codez le service
         return  installations.find().skip(random).limit(1).as(Installation.class).next();
-
-
     }
 
     /**
@@ -93,9 +85,8 @@ public class InstallationService {
      * @return l'installation avec le plus d'équipements.
      */
     public Installation installationWithMaxEquipments() {
-        System.out.println("withMaxEquipments");
-        return  installations.aggregate("{$project: {nbEquipements : { $size: \"$equipements\"},nom: 1,equipements: 1}}")
-        .and("{$sort:{\"nbEquipements\" : -1}}")
+        return  installations.aggregate("{$project: {nbEquipements : { $size: '$equipements'},nom: 1,equipements: 1}}")
+        .and("{$sort:{nbEquipements : -1}}")
         .and("{$limit : 1}")
         .as(Installation.class).iterator().next();
     }
@@ -107,9 +98,9 @@ public class InstallationService {
      */
     public List<CountByActivity> countByActivity() {
         System.out.println("countbyactivity");
-        Iterator<CountByActivity> it  = installations.aggregate(" {$unwind : \"$equipements\" }")
-                .and(" {$unwind :\"$equipements.activites\" }").and(" {$group: {_id:\"$equipements.activites\", total: {$sum:1} }}")
-        .and("\t{ $project : { _id : 0, activite : \"$_id\" , total : 1 } }\n"
+        Iterator<CountByActivity> it  = installations.aggregate(" {$unwind : '$equipements'}")
+                .and(" {$unwind :'$equipements.activites' }").and(" {$group: {_id:'$equipements.activites', total: {$sum:1} }}")
+        .and("{ $project : { _id : 0, activite : '$_id' , total : 1 } }"
                 ).and(" {$sort : {total : -1}}").as(CountByActivity.class).iterator();
 
         List<CountByActivity> countByActivities = new ArrayList<>();
@@ -117,19 +108,11 @@ public class InstallationService {
         while (it.hasNext()){
             countByActivities.add(it.next());
         }
-        System.out.println("countByActivities");
-        System.out.println(countByActivities.size());
-        System.out.println(countByActivities.get(0).getActivite());
-        System.out.println(countByActivities.get(0).getTotal());
-        //throw new UnsupportedOperationException();
         return countByActivities;
     }
 
     public double averageEquipmentsPerInstallation() {
-        System.out.println("averageEquipmentsPerInstallation");
-
-        double ret = (double)(installations.aggregate(" {$unwind : \"$equipements\"} ").as(Object.class).size())/(double )count() ;
-        System.out.println(ret);
+        double ret = (double)(installations.aggregate(" {$unwind : '$equipements'} ").as(Object.class).size())/(double )count() ;
         return ret;
     }
 
@@ -140,26 +123,15 @@ public class InstallationService {
      * @return les résultats correspondant à la requête.
      */
     public List<Installation> search(String searchQuery) {
-        System.out.println("Create Index Weight");
         BasicDBObject index = new BasicDBObject();
         index.put("nom", "text");
-        index.put("adresse", "text");
-        BasicDBObject weights = new BasicDBObject("nom", 3).append("adresse", 10);
+        index.put("adresse.commune", "text");
+        BasicDBObject weights = new BasicDBObject("nom", 3).append("adresse.commune", 10);
         BasicDBObject options = new BasicDBObject("weights", weights).append("default_language", "french");
+
         installations.getDBCollection().createIndex(index, options);
-
-
-        Iterator<Installation> it = installations.find("{\n" +
-                "        \"$text\": {\n" +
-                "            \"$search\": \""+searchQuery+"\",\n" +
-                "            \"$language\" : \"french\"\n" +
-                "        }\n" +
-                "    },\n" +
-                "    {\n" +
-                "        \"score\": {\"$meta\": \"textScore\"}\n" +
-                "    }").as(Installation.class).iterator();
+        Iterator<Installation> it = installations.find("{ $text : { $search : # , $language : 'french' } } {score : { $meta : 'textScore' } }",searchQuery).as(Installation.class).iterator();
         List<Installation> installationList = new ArrayList<>();
-        System.out.println("retour geo");
         while (it.hasNext()){
             installationList.add(it.next());
         }
