@@ -62,7 +62,7 @@ public class ImportTowns {
         Map<String, Object> playload = new HashMap<String,Object>();
         playload.put("townName", townName);
         playload.put("location", coordinates);
-        playloadMap.put("playload", playload);
+        playloadMap.put("payload", playload);
         map.put("townNameS", playloadMap);
             bulkRequest.add(elasticSearchClient.prepareIndex("towns", "town")
                             .setSource(map

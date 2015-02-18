@@ -44,7 +44,7 @@ public abstract class ElasticSearchBatchUtils {
             System.out.println("Bulk insert has failures : ");
             BulkItemResponse[] items = bulkResponse.getItems();
             for (BulkItemResponse bulkItemResponse : items) {
-                System.out.println(bulkItemResponse.getFailure());
+                System.out.println(bulkItemResponse.getFailure().getMessage());
             }
         }
     }

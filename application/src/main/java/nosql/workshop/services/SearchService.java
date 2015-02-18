@@ -6,6 +6,7 @@ import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import nosql.workshop.model.Installation;
 import nosql.workshop.model.suggest.TownSuggest;
+import org.apache.lucene.search.FieldValueHitQueue;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchType;
 import org.elasticsearch.client.Client;
@@ -14,10 +15,16 @@ import org.elasticsearch.common.transport.InetSocketTransportAddress;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.search.suggest.Suggest;
+import org.elasticsearch.search.suggest.completion.CompletionSuggestion;
+import org.elasticsearch.search.suggest.completion.CompletionSuggestionBuilder;
+import org.elasticsearch.search.suggest.term.TermSuggestion;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 /**
  *
@@ -88,11 +95,10 @@ public class SearchService {
 
     public List<TownSuggest> suggestTownName(String townName){
         System.out.println(townName);
-        SearchResponse response = elasticSearchClient.prepareSearch("towns")
-                .setTypes("town")
-                .setSearchType(SearchType.DFS_QUERY_THEN_FETCH)
-                .setQuery(QueryBuilders.wildcardQuery("townName", townName.toLowerCase() + "*"))
-                .setExplain(true)
+       /* SearchResponse response = elasticSearchClient.prepareSuggest("towns")
+                .setSuggestText(townName)
+                .
+
                 .execute()
                 .actionGet();
         System.out.println(response.getHits().getTotalHits());
@@ -104,7 +110,31 @@ public class SearchService {
             } catch (IOException e) {
                 e.printStackTrace();
             }
+        }*/
+        System.out.println("ici");
+        CompletionSuggestionBuilder compBuilder = new CompletionSuggestionBuilder("towns");
+        compBuilder.text(townName);
+        compBuilder.field("townNameS");
+
+        SearchResponse searchResponse = elasticSearchClient.prepareSearch(TOWNS_INDEX)
+                .setTypes("completion")
+                .setQuery(QueryBuilders.matchAllQuery())
+                .addSuggestion(compBuilder)
+                .execute().actionGet();
+
+        CompletionSuggestion compSuggestion = searchResponse.getSuggest().getSuggestion("towns");
+        List<TownSuggest> townSuggests =  new ArrayList<TownSuggest>();
+        System.out.println(compSuggestion.getName());
+        Iterator<CompletionSuggestion.Entry.Option> it = compSuggestion.iterator().next().getOptions().iterator();
+        while (it.hasNext()){
+            //ystem.out.println(it.next().getPayloadAsString());
+            try {
+                townSuggests.add(objectMapper.readValue(it.next().getPayloadAsString(), TownSuggest.class));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
+
         return townSuggests;
 
 
