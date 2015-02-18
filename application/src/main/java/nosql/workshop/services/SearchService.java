@@ -54,8 +54,8 @@ public class SearchService {
         System.out.println("search "+ searchQuery);
         QueryBuilder qb = QueryBuilders
                 .boolQuery()
-                .must(QueryBuilders.wildcardQuery("adresse.commune", searchQuery+"*").boost(10))
-                .must(QueryBuilders.wildcardQuery("nom", searchQuery+"*").boost(3));
+                .must(QueryBuilders.queryString(searchQuery)
+               );
 
         SearchResponse response = elasticSearchClient.prepareSearch("installations")
                 .setTypes("installation")

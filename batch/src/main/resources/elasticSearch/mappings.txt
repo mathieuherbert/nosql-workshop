@@ -1,5 +1,6 @@
-curl -XPOST localhost:9200/installations -d '{
-    "settings": {
+POST /installations
+{
+  "settings": {
     	"analysis": {
 			"filter": {
 				"french_elision": {
@@ -31,19 +32,15 @@ curl -XPOST localhost:9200/installations -d '{
 		}
 	},
 	"mappings": {
-		"installation": {
-			"properties": {
-				"location": {
-					"properties": {
-						"coordinates": {
-							"type": "geo_point"
-						}
-					}
-				}
-			}
-		}
+		"installation":
+  {"properties":
+    {
+      "adresse.commune": {"type":"string","analyser":"default"},
+    "nom": {"type":"string","analyser":"default"}
+    }
+  }
 	}
-}'
+}
 
 curl -XPOST localhost:9200/towns -d '{
     "mappings" : {
