@@ -42,18 +42,19 @@ POST /installations
 	}
 }
 
-curl -XPOST localhost:9200/towns -d '{
-    "mappings" : {
-    	"town" : {
-		    "properties" : {
-                "townName" : {"type" : "string"},
-                "townNameSuggest" : {
-                    "type" : "completion",
-                    "payloads" : true
-                },
-                "postCode" : {"type" : "string"},
-				"location" : {"type" : "geo_point"}
-			}
-		}
-    }
-}'
+PUT /towns/
+{
+   "mappings": {
+      "town": {
+         "properties": {
+            "townName" : { "type" : "string" },
+            "townNameS": {
+               "type": "completion",
+
+               "payloads": true
+            }
+         }
+      }
+   }
+}
+

@@ -2,6 +2,14 @@
 
 *Découverte de [MongoDB](http://www.mongodb.org/) et d'[Elasticsearch](http://www.elasticsearch.org/), par la pratique !*
 
+## Matthieu Gutierrez - Mathieu Herbert
+Réalisations :
+* Les services MongoDB sont réalisés
+* Les services ElasticSearch sont réalisés
+* La création d'index ElasticSearch se trouve dans le mapping.txt (modifié par nos soins).
+* La suggestion est réalisée
+* La recherche avec des erreurs d'orthographe est réalisée
+
 
 ## Prise en main de MongoDB
 
